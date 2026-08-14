@@ -1,147 +1,139 @@
-# TaskFlow — Plan. Prioritize. Complete.
+# 🌌 TaskFlow — Premium Workspace & Task Organizer
 
-TaskFlow is a modern, production-grade **Task Management Web Application** built as a full-stack developer portfolio project. It demonstrates secure JWT authentication, dynamic REST APIs, raw SQLite database interactions, and a premium responsive user interface with native light/dark mode support.
+TaskFlow is a premium, modern, and production-grade **Task Management Web Application** designed with a mesmerizing glassmorphic UI. It features a hybrid database engine (Local SQLite / Production PostgreSQL), subtask checklists, calendar monthly views, tag classifications, and stateless JWT authorization.
+
+🚀 **Live Cloud Deployment**: [https://task-management-workspace.vercel.app](https://task-management-workspace.vercel.app)
+💻 **GitHub Repository**: [https://github.com/Raksha-Shetty18/TaskFlow](https://github.com/Raksha-Shetty18/TaskFlow)
 
 ---
 
-## 🚀 Key Features
+## ✨ Key Features & UX Capabilities
 
-* **Secure Authentication**: User signup and login utilizing `bcryptjs` password hashing and stateless JSON Web Tokens (JWT).
-* **Workspace Dashboard**: Real-time aggregation of task progress, completion metrics, focus lists, overdue highlights, and upcoming deadlines.
-* **Full Task CRUD**: Complete Create, Read, Update, and Delete operations for user tasks.
-* **Advanced Filters & Search**: Search dynamically through task titles, descriptions, and categories. Filter results by status, priority level, category, or due date.
-* **Custom Sorting**: Sort tasks by newest, oldest, alphabetical title, due date, priority hierarchy, or recently updated timestamps.
-* **User Profile Center**: Edit contact information and update security credentials securely.
-* **Resource Authorization**: Strict backend-level validation ensuring users can only read, write, toggle, or delete their own data.
-* **Responsive Fluid Design**: Clean user experience across mobile, tablet, laptop, and desktop screen sizes using CSS Grid, Flexbox, and media queries.
+### 🎨 Visual & Motion Design
+* **Glassmorphic UI**: Translucent frosted-glass panels (`backdrop-filter: blur(16px)`) with crisp light-refracting edge borders.
+* **Ambient Shifting Background**: A mesmerizing 4-color mesh gradient background that moves dynamically in a continuous 20-second loop.
+* **Floating Blur Blobs**: Orbiting ambient vector blobs that slide and scale behind user layout panels for an immersive backdrop.
+* **Explicit Light/Dark Theme Switcher**: Explicit sidebar selector (`🌓`) persisted to `localStorage` to avoid flash-on-load anomalies.
+* **Radial conic progress ring**: A CSS conic-gradient progress indicator that dynamically updates completion percentages inside the stats grid.
+* **Running Clock Widget**: A real-time ticking date-time clock in the dashboard header banner.
+
+### ⚙️ Workspace Functions
+* **Subtasks Checklist**: Add nested, modular checklists to any task with real-time progress calculations and cascading database deletions.
+* **Monthly Calendar Grid**: A visually interactive monthly calendar view plotting priority-colored task bubbles on their respective due dates.
+* **Tags/Labels System**: Classify tasks with multiple tags (e.g. `audit`, `finance`, `urgent`) and search through tags dynamically.
+* **Category & Priority Emoji Badges**: Automatic visual icon attachments (e.g., `🎓 College`, `💼 Work`, `🚩 Urgent`, `⚡ High`).
+* **Advanced Filters & Sorts**: Live search and filter tasks by category, priority, status, or due date, and sort them chronologically or alphabetically.
 
 ---
 
 ## 🛠️ Technology Stack
 
-* **Frontend**: HTML5, CSS3 (Vanilla design, no external utility frameworks), Vanilla JavaScript (Modular ES6 Fetch).
-* **Backend**: Node.js, Express.js (REST APIs, routing, error handlers).
-* **Security & Tokens**: `bcryptjs` for encryption, `jsonwebtoken` for secure stateless tokens.
-* **Database**: **SQLite** (via the `sqlite3` driver).
+* **Frontend**: Pure HTML5, Vanilla CSS3 (Custom design system, zero frameworks), Modular ES6 JS (async/await Fetch).
+* **Backend**: Node.js, Express.js (Modular routes, JWT authentication, and centralized error handling middleware).
+* **Databases**: 
+  - **SQLite**: Fast, zero-configuration database for local offline development.
+  - **PostgreSQL**: Cloud-ready enterprise database for production deployments.
+* **Hosting**: Vercel (Serverless Node.js function routes).
 
 ---
 
-## 📂 Database Design & Selection Rationale
+## 📐 Architecture: Hybrid Database Engine
 
-### Why SQLite?
-1. **Relational Consistency**: User accounts and tasks share a strict one-to-many relationship. A SQL-based database allows us to utilize foreign keys with cascading deletions (`ON DELETE CASCADE`), index constraints, and run fast, direct aggregation queries for dashboard analytics.
-2. **Zero-Configuration Setup**: SQLite stores the database in a local file (`taskflow.db`). Anyone who clones this repository can immediately launch the project without configuring servers, local database engines, or Docker containers.
-3. **Raw SQL Operations**: We use the native driver to execute raw parameterized SQL statements instead of hiding DB interactions behind heavy ORMs. This demonstrates strong SQL query design and optimization knowledge.
+TaskFlow features a hybrid database connection layer that automatically switches engines based on the active environment:
 
-### Schema Blueprint
-
-#### Users Table
-```sql
-CREATE TABLE users (
-  id INTEGER PRIMARY KEY AUTOINCREMENT,
-  name TEXT NOT NULL,
-  email TEXT UNIQUE NOT NULL,
-  password_hash TEXT NOT NULL,
-  created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-  updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
-);
+```
+                  ┌───────────────────────────┐
+                  │   Process Startup (.env)  │
+                  └─────────────┬─────────────┘
+                                │
+                      Is DATABASE_URL set?
+                                │
+                     ┌──────────┴──────────┐
+                    Yes                    No
+                     ▼                     ▼
+        ┌───────────────────────┐   ┌───────────────┐
+        │ PostgreSQL (Neon/pg)  │   │ SQLite (File) │
+        └───────────────────────┘   └───────────────┘
 ```
 
-#### Tasks Table
-```sql
-CREATE TABLE tasks (
-  id INTEGER PRIMARY KEY AUTOINCREMENT,
-  user_id INTEGER NOT NULL,
-  title TEXT NOT NULL,
-  description TEXT,
-  category TEXT NOT NULL CHECK(category IN ('College', 'Work', 'Personal', 'Project', 'Learning', 'Other')),
-  priority TEXT NOT NULL CHECK(priority IN ('Low', 'Medium', 'High', 'Urgent')),
-  status TEXT NOT NULL CHECK(status IN ('Pending', 'In Progress', 'Completed', 'Cancelled')),
-  due_date TEXT, -- Store ISO 8601 string (YYYY-MM-DD)
-  created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-  updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-  completed_at DATETIME,
-  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
-);
-
--- Performance Indexes
-CREATE INDEX idx_tasks_user_id ON tasks(user_id);
-CREATE INDEX idx_tasks_status ON tasks(status);
-CREATE INDEX idx_tasks_due_date ON tasks(due_date);
-```
+### Dynamic Query Translator
+Because SQLite and PostgreSQL have different syntaxes, TaskFlow implements a dynamic query translator in [`src/config/database.js`](file:///c:/Users/Raksha/OneDrive/Desktop/Projects/Task_Management/src/config/database.js):
+* **Parameters**: Automatically binds parameters from SQLite `?` notation to PostgreSQL `$1`, `$2` bindings.
+* **Date Math**: Maps SQLite date modifiers `date('now', 'localtime')` to SQL standard `CURRENT_DATE`.
+* **Insertions**: Intercepts `INSERT` queries on PostgreSQL, appending `RETURNING id` to return the index identically to SQLite's `lastID` callback.
 
 ---
 
 ## 🔌 API Endpoints Reference
 
-### Authentication Routing
-* `POST /api/auth/register` — Registers a new user. Returns a confirmation message.
-* `POST /api/auth/login` — Verifies email/password and returns a signed JWT.
-* `POST /api/auth/logout` — Destroys local session cache references.
+### Authentication (Public)
+* `POST /api/auth/register` — Creates a user account.
+* `POST /api/auth/login` — Returns a signed JSON Web Token (JWT).
 
-### Task Management Routing (Protected)
-* `GET /api/tasks` — Retrieves user tasks. Supports query options: `?search=val&status=val&priority=val&category=val&dueDate=val&sort=val`.
-* `GET /api/tasks/:id` — Retrieves a single task's specifications.
-* `POST /api/tasks` — Creates a new task.
-* `PUT /api/tasks/:id` — Edits all attributes of an existing task.
-* `PATCH /api/tasks/:id/complete` — Toggles the status between Completed and Pending/In Progress.
-* `DELETE /api/tasks/:id` — Permanently removes a task.
+### Task Routing (Protected)
+* `GET /api/tasks` — Retrieves tasks. Supports queries: `?search=val&status=val&priority=val&category=val&dueDate=val&sort=val`.
+* `POST /api/tasks` — Creates a task.
+* `GET /api/tasks/:id` — Retrieves a task (includes nested checklist subtasks).
+* `PUT /api/tasks/:id` — Edits all attributes of a task.
+* `DELETE /api/tasks/:id` — Cascades delete of the task and its subtasks.
 
-### Metrics Routing (Protected)
-* `GET /api/dashboard` — Aggregates stats counts and focus lists.
-* `GET /api/profile` — Retrieves the current user's profile details.
-* `PUT /api/profile` — Updates user profile name/email and handles security password changes.
+### Subtasks Checklist Routing (Protected)
+* `POST /api/tasks/:id/subtasks` — Adds a subtask checklist item.
+* `PUT /api/tasks/:id/subtasks/:subtaskId` — Toggles subtask completion (`is_completed` 0/1).
+* `DELETE /api/tasks/:id/subtasks/:subtaskId` — Deletes a subtask item.
+
+### Dashboard & Profile (Protected)
+* `GET /api/dashboard` — Aggregates count statistics, overdue task warnings, and focus schedules.
+* `GET /api/profile` — Retrieves profile stats.
+* `PUT /api/profile` — Updates name, email, and password credentials.
 
 ---
 
 ## ⚙️ Installation & Setup Guide
 
-### Prerequisites
-* [Node.js](https://nodejs.org) (v18.0.0 or higher)
-* [npm](https://www.npmjs.com/)
-
 ### 1. Clone & Install
 ```bash
-git clone https://github.com/your-username/taskflow.git
-cd taskflow
+git clone https://github.com/Raksha-Shetty18/TaskFlow.git
+cd TaskFlow
 npm install
 ```
 
-### 2. Configure Environment Variables
+### 2. Environment Configurations
 Create a `.env` file in the root directory (based on `.env.example`):
 ```env
 PORT=5000
 JWT_SECRET=your_super_secret_jwt_key_here
 DB_PATH=./taskflow.db
 NODE_ENV=development
+
+# To connect to online Neon PostgreSQL in dev mode, paste your connection string below:
+# DATABASE_URL=postgresql://neondb_owner:***@ep-***.aws.neon.tech/neondb?sslmode=require
 ```
 
 ### 3. Run the Application
 
-#### Development (Auto-Reloading)
+#### Local Development (Auto-Reloading SQLite)
 ```bash
 npm run dev
 ```
+Open **[http://localhost:5000](http://localhost:5000)** in your browser.
 
-#### Production (Standard Start)
+#### Test Database Connections
+To verify E2E SQL schemas and transactions:
 ```bash
-npm start
+node scratch/verify_api.js
 ```
-
-Open your browser and navigate to `http://localhost:5000` to interact with TaskFlow!
 
 ---
 
-## 🛡️ Security Best Practices Implemented
-
-* **SQL Injection Prevention**: All SQL statements use parameterized queries (`?` bindings) to ensure inputs are treated strictly as data literals.
-* **Credential Protection**: Passwords are encrypted on register using `bcryptjs` with 10 salt rounds and verified on login. Raw passwords are never persisted.
-* **Server-side Authorization Middleware**: Route protection checks for signed JWTs.
-* **Ownership Integrity**: Data modifications (update, delete, check detail) query with `WHERE id = ? AND user_id = ?` to verify the task belongs to the authenticated user.
-* **Safe Error Handling**: Returns clean client-friendly JSON error messages. Raw database stack traces are suppressed in production mode.
-* **Client-side Sanitization**: Vanilla JS encodes and escapes titles and descriptions on output to protect against Cross-Site Scripting (XSS).
+## 🛡️ Security Best Practices
+* **SQL Injection Protection**: All SQL inputs use parameterized queries.
+* **Secure Hashing**: Multi-round `bcryptjs` encryption for stored user password hashes.
+* **Server-side Authorization**: Route protection verified using signed, verified JWT payloads.
+* **Ownership Verification**: Modifying endpoints filter queries explicitly by both target ID and authenticated user ID (`WHERE id = ? AND user_id = ?`).
+* **HTML Escaping**: Client-side outputs sanitize inputs against Cross-Site Scripting (XSS).
 
 ---
 
 ## 👤 Author
-Developed with ❤️ as a Full-Stack portfolio project.
+Developed by [Raksha Shetty](https://github.com/Raksha-Shetty18) as a premium full-stack developer portfolio project.
