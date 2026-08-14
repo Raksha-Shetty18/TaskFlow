@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>My Profile — TaskFlow</title>
+  <link rel="stylesheet" href="/css/styles.css">
+  <script src="/js/api.js" defer></script>
+</head>
+<body>
+  <div class="app-layout">
+    <!-- Sidebar rendered dynamically via utils.renderSidebar() -->
+    <div id="sidebar-container"></div>
+
+    <main class="main-content" id="profile-content">
+      <header class="content-header">
+        <div class="content-title">
+          <h2>My Profile</h2>
+          <p>Update your credentials and account details.</p>
+        </div>
+      </header>
+
+      <section style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 2rem; align-items: start;">
+        <!-- Profile details edit panel -->
+        <div class="section-card" id="profile-card">
+          <div class="section-card-header">
+            <h3>Profile Specifications</h3>
+          </div>
+          <form id="profile-form">
+            <div class="form-group">
+              <label for="profile-name">Full Name</label>
+              <input type="text" id="profile-name" class="form-control" placeholder="John Doe" required>
+            </div>
+
+            <div class="form-group">
+              <label for="profile-email">Email Address</label>
+              <input type="email" id="profile-email" class="form-control" placeholder="name@company.com" required>
+            </div>
+
+            <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 1rem;">
+              Save Profile Settings
+            </button>
+          </form>
+        </div>
+
+        <!-- Security change password panel -->
+        <div class="section-card" id="security-card">
+          <div class="section-card-header">
+            <h3>Change Password</h3>
+          </div>
+          <form id="security-form">
+            <div class="form-group">
+              <label for="current-password">Current Password</label>
+              <input type="password" id="current-password" class="form-control" placeholder="••••••••" required autocomplete="current-password">
+            </div>
+
+            <div class="form-group">
+              <label for="new-password">New Password</label>
+              <input type="password" id="new-password" class="form-control" placeholder="Min. 8 characters" required autocomplete="new-password">
+            </div>
+
+            <div class="form-group">
+              <label for="confirm-new-password">Confirm New Password</label>
+              <input type="password" id="confirm-new-password" class="form-control" placeholder="Repeat new password" required autocomplete="new-password">
+            </div>
+
+            <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 1rem;">
+              Update Password
+            </button>
+          </form>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script src="/js/utils.js"></script>
+  <script src="/js/profile.js"></script>
+</body>
+</html>

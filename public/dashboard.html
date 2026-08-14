@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard — TaskFlow</title>
+  <link rel="stylesheet" href="/css/styles.css">
+  <script src="/js/api.js" defer></script>
+</head>
+<body>
+  <div class="app-layout">
+    <!-- Sidebar rendered dynamically via utils.renderSidebar() -->
+    <div id="sidebar-container"></div>
+
+    <main class="main-content" id="dashboard-content">
+      <header class="content-header">
+        <div class="content-title">
+          <h2 id="welcome-title">Dashboard</h2>
+          <p>Here is your productivity overview for today.</p>
+        </div>
+        <div style="display: flex; gap: 1rem; align-items: center; flex-wrap: wrap;">
+          <div class="datetime-widget">
+            <span class="datetime-icon">📅</span>
+            <span class="datetime-text" id="live-datetime">Friday, Aug 14, 2026 — 4:15 PM</span>
+          </div>
+          <button id="add-task-btn" class="btn btn-primary">+ Add Task</button>
+        </div>
+      </header>
+
+      <!-- Statistics Grid -->
+      <section class="stats-grid">
+        <div class="stat-card total">
+          <span class="stat-title">Total Tasks</span>
+          <span class="stat-value" id="stat-total">0</span>
+        </div>
+        <div class="stat-card pending">
+          <span class="stat-title">Pending</span>
+          <span class="stat-value" id="stat-pending">0</span>
+        </div>
+        <div class="stat-card in-progress">
+          <span class="stat-title">In Progress</span>
+          <span class="stat-value" id="stat-in-progress">0</span>
+        </div>
+        <div class="stat-card completed">
+          <span class="stat-title">Completed</span>
+          <span class="stat-value" id="stat-completed">0</span>
+          <div class="radial-progress-container">
+            <div class="radial-progress-circle" id="stat-completion-circle">
+              <span class="radial-progress-value" id="stat-completion-val">0%</span>
+            </div>
+          </div>
+        </div>
+        <div class="stat-card overdue">
+          <span class="stat-title">Overdue</span>
+          <span class="stat-value" id="stat-overdue">0</span>
+        </div>
+      </section>
+
+      <!-- Productivity & Details -->
+      <section class="productivity-panel">
+        <div class="section-card">
+          <div class="section-card-header">
+            <h3>Today's Focus</h3>
+            <span class="badge badge-pending" id="today-tasks-count">0 tasks</span>
+          </div>
+          <div class="task-row-list" id="today-tasks-list">
+            <!-- Rendered dynamically -->
+          </div>
+        </div>
+
+        <div class="section-card">
+          <div class="section-card-header">
+            <h3>Productivity</h3>
+          </div>
+          <div style="display: flex; flex-direction: column; gap: 1rem;">
+            <div>
+              <span class="stat-title">Completion Rate</span>
+              <div style="display: flex; align-items: center; gap: 1rem; margin-top: 0.25rem;">
+                <h2 id="prod-rate" style="font-size: 2.25rem; font-weight: 700;">0%</h2>
+              </div>
+            </div>
+            <div style="border-top: 1px solid var(--border-color); padding-top: 1rem;">
+              <span class="stat-title">Completed this week</span>
+              <h3 id="prod-week" style="font-size: 1.35rem; margin-top: 0.25rem;">0</h3>
+            </div>
+            <div style="border-top: 1px solid var(--border-color); padding-top: 1rem;">
+              <span class="stat-title">Completed this month</span>
+              <h3 id="prod-month" style="font-size: 1.35rem; margin-top: 0.25rem;">0</h3>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Task Lists Grid (Upcoming, Overdue, Recently Created) -->
+      <section style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 2rem; margin-top: 2rem;">
+        <!-- Overdue Tasks -->
+        <div class="section-card">
+          <div class="section-card-header" style="border-bottom-color: hsla(360, 85%, 50%, 0.2)">
+            <h3 style="color: hsl(360, 85%, 55%);">Overdue Tasks</h3>
+          </div>
+          <div class="task-row-list" id="overdue-tasks-list">
+            <!-- Rendered dynamically -->
+          </div>
+        </div>
+
+        <!-- Upcoming Tasks -->
+        <div class="section-card">
+          <div class="section-card-header">
+            <h3>Upcoming Deadlines</h3>
+          </div>
+          <div class="task-row-list" id="upcoming-tasks-list">
+            <!-- Rendered dynamically -->
+          </div>
+        </div>
+
+        <!-- Recently Created Tasks -->
+        <div class="section-card">
+          <div class="section-card-header">
+            <h3>Recently Created</h3>
+          </div>
+          <div class="task-row-list" id="recent-tasks-list">
+            <!-- Rendered dynamically -->
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <!-- Create Task Dialog overlay -->
+  <div class="dialog-overlay" id="task-dialog">
+    <div class="dialog-container">
+      <div class="dialog-header">
+        <h3 class="dialog-title" id="dialog-title">Create Task</h3>
+        <button class="dialog-close" id="task-dialog-close">&times;</button>
+      </div>
+      <form id="task-form">
+        <div class="dialog-body">
+          <input type="hidden" id="task-id">
+          
+          <div class="form-group">
+            <label for="task-title">Task Title</label>
+            <input type="text" id="task-title" class="form-control" placeholder="Complete report design" required>
+          </div>
+
+          <div class="form-group">
+            <label for="task-desc">Description</label>
+            <textarea id="task-desc" class="form-control" placeholder="Add optional details..."></textarea>
+          </div>
+
+          <div class="form-group">
+            <label for="task-tags">Tags (comma-separated)</label>
+            <input type="text" id="task-tags" class="form-control" placeholder="design, physics, review">
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="task-category">Category</label>
+              <select id="task-category" class="form-control">
+                <option value="Personal">Personal</option>
+                <option value="Work">Work</option>
+                <option value="College">College</option>
+                <option value="Project">Project</option>
+                <option value="Learning">Learning</option>
+                <option value="Other" selected>Other</option>
+              </select>
+            </div>
+            
+            <div class="form-group">
+              <label for="task-priority">Priority</label>
+              <select id="task-priority" class="form-control">
+                <option value="Low">Low</option>
+                <option value="Medium" selected>Medium</option>
+                <option value="High">High</option>
+                <option value="Urgent">Urgent</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="task-status">Status</label>
+              <select id="task-status" class="form-control">
+                <option value="Pending" selected>Pending</option>
+                <option value="In Progress">In Progress</option>
+                <option value="Completed">Completed</option>
+                <option value="Cancelled">Cancelled</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label for="task-due-date">Due Date</label>
+              <input type="date" id="task-due-date" class="form-control">
+            </div>
+          </div>
+
+          <!-- Subtasks checklist editor section -->
+          <div class="subtasks-section" id="dialog-subtasks-container" style="display: none;">
+            <h4>Subtask Checklist</h4>
+            <div class="subtask-add-form">
+              <input type="text" id="new-subtask-title" class="form-control" placeholder="Add checklist item...">
+              <button type="button" class="btn btn-secondary" id="add-subtask-btn">Add</button>
+            </div>
+            <ul class="subtask-list" id="dialog-subtask-list">
+              <!-- Rendered dynamically -->
+            </ul>
+          </div>
+        </div>
+        <div class="dialog-footer">
+          <button type="button" class="btn btn-secondary" id="task-dialog-cancel">Cancel</button>
+          <button type="submit" class="btn btn-primary" id="task-dialog-submit">Save Task</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script src="/js/utils.js"></script>
+  <script src="/js/dashboard.js"></script>
+</body>
+</html>

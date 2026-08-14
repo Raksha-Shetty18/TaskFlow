@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sign Up for TaskFlow</title>
+  <meta name="description" content="Create a new TaskFlow account.">
+  <link rel="stylesheet" href="/css/styles.css">
+  <script src="/js/api.js" defer></script>
+</head>
+<body>
+  <div class="auth-container">
+    <div class="auth-card" id="register-card">
+      <div class="auth-header">
+        <a href="/index.html" class="logo-container">
+          <div class="logo-icon">T</div>
+          <span>TaskFlow</span>
+        </a>
+        <h2>Create Account</h2>
+        <p>Start organizing your tasks and tracking stats</p>
+      </div>
+
+      <form id="register-form">
+        <div class="form-group">
+          <label for="name">Full Name</label>
+          <input type="text" id="name" class="form-control" placeholder="John Doe" required autocomplete="name">
+        </div>
+
+        <div class="form-group">
+          <label for="email">Email Address</label>
+          <input type="email" id="email" class="form-control" placeholder="name@company.com" required autocomplete="email">
+        </div>
+
+        <div class="form-group">
+          <label for="password">Password</label>
+          <input type="password" id="password" class="form-control" placeholder="Min. 8 characters" required autocomplete="new-password">
+        </div>
+
+        <div class="form-group">
+          <label for="confirm-password">Confirm Password</label>
+          <input type="password" id="confirm-password" class="form-control" placeholder="Repeat your password" required autocomplete="new-password">
+        </div>
+
+        <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 1rem;">
+          Sign Up
+        </button>
+      </form>
+
+      <div class="auth-footer">
+        Already have an account? <a href="/login.html">Log in here</a>
+      </div>
+    </div>
+  </div>
+
+  <script src="/js/utils.js"></script>
+  <script src="/js/auth.js"></script>
+</body>
+</html>

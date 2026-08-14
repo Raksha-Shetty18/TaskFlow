@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>My Tasks — TaskFlow</title>
+  <link rel="stylesheet" href="/css/styles.css">
+  <script src="/js/api.js" defer></script>
+</head>
+<body>
+  <div class="app-layout">
+    <!-- Sidebar rendered dynamically via utils.renderSidebar() -->
+    <div id="sidebar-container"></div>
+
+    <main class="main-content" id="tasks-content">
+      <header class="content-header">
+        <div class="content-title">
+          <h2>My Tasks</h2>
+          <p>Organize, track, and complete your daily targets.</p>
+        </div>
+        <button id="add-task-btn" class="btn btn-primary">+ Add Task</button>
+      </header>
+
+      <section class="tasks-workspace">
+        <!-- Filter and Search Bar -->
+        <div class="filter-bar">
+          <div class="search-box">
+            <span class="search-icon">🔍</span>
+            <input type="text" id="search-input" class="form-control search-input" placeholder="Search tasks by title, desc, or category...">
+          </div>
+
+          <div class="filter-selectors">
+            <!-- Status Filter -->
+            <div class="filter-select-group">
+              <select id="filter-status" class="filter-select" title="Status">
+                <option value="All">All Statuses</option>
+                <option value="Pending">Pending</option>
+                <option value="In Progress">In Progress</option>
+                <option value="Completed">Completed</option>
+                <option value="Cancelled">Cancelled</option>
+              </select>
+            </div>
+
+            <!-- Priority Filter -->
+            <div class="filter-select-group">
+              <select id="filter-priority" class="filter-select" title="Priority">
+                <option value="All">All Priorities</option>
+                <option value="Low">Low</option>
+                <option value="Medium">Medium</option>
+                <option value="High">High</option>
+                <option value="Urgent">Urgent</option>
+              </select>
+            </div>
+
+            <!-- Category Filter -->
+            <div class="filter-select-group">
+              <select id="filter-category" class="filter-select" title="Category">
+                <option value="All">All Categories</option>
+                <option value="College">College</option>
+                <option value="Work">Work</option>
+                <option value="Personal">Personal</option>
+                <option value="Project">Project</option>
+                <option value="Learning">Learning</option>
+                <option value="Other">Other</option>
+              </select>
+            </div>
+
+            <!-- Due Date Filter -->
+            <div class="filter-select-group">
+              <select id="filter-due-date" class="filter-select" title="Due Date">
+                <option value="All">All Due Dates</option>
+                <option value="Today">Today</option>
+                <option value="Tomorrow">Tomorrow</option>
+                <option value="This Week">This Week</option>
+                <option value="Overdue">Overdue</option>
+              </select>
+            </div>
+
+            <!-- Sorting Select -->
+            <div class="filter-select-group" style="margin-left: auto;">
+              <span style="font-size: 0.8rem; color: var(--text-muted); font-weight: 500; text-transform: uppercase;">Sort by:</span>
+              <select id="sort-select" class="filter-select" title="Sort">
+                <option value="Newest" selected>Newest</option>
+                <option value="Oldest">Oldest</option>
+                <option value="Due Date">Due Date</option>
+                <option value="Priority">Priority</option>
+                <option value="Alphabetical">Alphabetical</option>
+                <option value="Recently Updated">Recently Updated</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <!-- Task List Rows Container -->
+        <div class="task-row-list" id="tasks-list">
+          <!-- Rendered dynamically -->
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <!-- Create/Edit Task Dialog Overlay -->
+  <div class="dialog-overlay" id="task-dialog">
+    <div class="dialog-container">
+      <div class="dialog-header">
+        <h3 class="dialog-title" id="dialog-title">Create Task</h3>
+        <button class="dialog-close" id="task-dialog-close">&times;</button>
+      </div>
+      <form id="task-form">
+        <div class="dialog-body">
+          <input type="hidden" id="task-id">
+          
+          <div class="form-group">
+            <label for="task-title">Task Title</label>
+            <input type="text" id="task-title" class="form-control" placeholder="Complete report design" required>
+          </div>
+
+          <div class="form-group">
+            <label for="task-desc">Description</label>
+            <textarea id="task-desc" class="form-control" placeholder="Add optional details..."></textarea>
+          </div>
+
+          <div class="form-group">
+            <label for="task-tags">Tags (comma-separated)</label>
+            <input type="text" id="task-tags" class="form-control" placeholder="design, physics, review">
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="task-category">Category</label>
+              <select id="task-category" class="form-control">
+                <option value="Personal">Personal</option>
+                <option value="Work">Work</option>
+                <option value="College">College</option>
+                <option value="Project">Project</option>
+                <option value="Learning">Learning</option>
+                <option value="Other" selected>Other</option>
+              </select>
+            </div>
+            
+            <div class="form-group">
+              <label for="task-priority">Priority</label>
+              <select id="task-priority" class="form-control">
+                <option value="Low">Low</option>
+                <option value="Medium" selected>Medium</option>
+                <option value="High">High</option>
+                <option value="Urgent">Urgent</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="task-status">Status</label>
+              <select id="task-status" class="form-control">
+                <option value="Pending" selected>Pending</option>
+                <option value="In Progress">In Progress</option>
+                <option value="Completed">Completed</option>
+                <option value="Cancelled">Cancelled</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label for="task-due-date">Due Date</label>
+              <input type="date" id="task-due-date" class="form-control">
+            </div>
+          </div>
+
+          <!-- Subtasks checklist editor section -->
+          <div class="subtasks-section" id="dialog-subtasks-container" style="display: none;">
+            <h4>Subtask Checklist</h4>
+            <div class="subtask-add-form">
+              <input type="text" id="new-subtask-title" class="form-control" placeholder="Add checklist item...">
+              <button type="button" class="btn btn-secondary" id="add-subtask-btn">Add</button>
+            </div>
+            <ul class="subtask-list" id="dialog-subtask-list">
+              <!-- Rendered dynamically -->
+            </ul>
+          </div>
+        </div>
+        <div class="dialog-footer">
+          <button type="button" class="btn btn-secondary" id="task-dialog-cancel">Cancel</button>
+          <button type="submit" class="btn btn-primary" id="task-dialog-submit">Save Task</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script src="/js/utils.js"></script>
+  <script src="/js/tasks.js"></script>
+</body>
+</html>

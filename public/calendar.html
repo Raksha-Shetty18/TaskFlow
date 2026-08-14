@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Calendar — TaskFlow</title>
+  <link rel="stylesheet" href="/css/styles.css">
+  <script src="/js/api.js" defer></script>
+</head>
+<body>
+  <div class="app-layout">
+    <!-- Sidebar rendered dynamically via utils.renderSidebar() -->
+    <div id="sidebar-container"></div>
+
+    <main class="main-content" id="calendar-content">
+      <header class="content-header">
+        <div class="content-title">
+          <h2>Calendar View</h2>
+          <p>Plot your goals on a monthly timeline.</p>
+        </div>
+      </header>
+
+      <!-- Calendar Container -->
+      <section class="calendar-wrapper">
+        <header class="calendar-header-actions">
+          <div class="calendar-title-group">
+            <button class="btn btn-secondary" id="prev-month-btn">◀</button>
+            <h3 id="calendar-month-year" style="font-size: 1.35rem; width: 180px; text-align: center;">August 2026</h3>
+            <button class="btn btn-secondary" id="next-month-btn">▶</button>
+          </div>
+          <button class="btn btn-secondary" id="today-btn">Today</button>
+        </header>
+
+        <!-- Weekday Headers -->
+        <div class="calendar-grid" style="border-bottom: none; border-bottom-left-radius: 0; border-bottom-right-radius: 0;">
+          <div class="calendar-weekday">Sun</div>
+          <div class="calendar-weekday">Mon</div>
+          <div class="calendar-weekday">Tue</div>
+          <div class="calendar-weekday">Wed</div>
+          <div class="calendar-weekday">Thu</div>
+          <div class="calendar-weekday">Fri</div>
+          <div class="calendar-weekday">Sat</div>
+        </div>
+
+        <!-- Days Grid -->
+        <div class="calendar-grid" id="calendar-days-grid" style="border-top-left-radius: 0; border-top-right-radius: 0;">
+          <!-- Rendered dynamically -->
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <!-- Create/Edit Task Dialog Overlay -->
+  <div class="dialog-overlay" id="task-dialog">
+    <div class="dialog-container">
+      <div class="dialog-header">
+        <h3 class="dialog-title" id="dialog-title">Edit Task</h3>
+        <button class="dialog-close" id="task-dialog-close">&times;</button>
+      </div>
+      <form id="task-form">
+        <div class="dialog-body">
+          <input type="hidden" id="task-id">
+          
+          <div class="form-group">
+            <label for="task-title">Task Title</label>
+            <input type="text" id="task-title" class="form-control" placeholder="Complete report design" required>
+          </div>
+
+          <div class="form-group">
+            <label for="task-desc">Description</label>
+            <textarea id="task-desc" class="form-control" placeholder="Add optional details..."></textarea>
+          </div>
+
+          <div class="form-group">
+            <label for="task-tags">Tags (comma-separated)</label>
+            <input type="text" id="task-tags" class="form-control" placeholder="design, physics, review">
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="task-category">Category</label>
+              <select id="task-category" class="form-control">
+                <option value="Personal">Personal</option>
+                <option value="Work">Work</option>
+                <option value="College">College</option>
+                <option value="Project">Project</option>
+                <option value="Learning">Learning</option>
+                <option value="Other" selected>Other</option>
+              </select>
+            </div>
+            
+            <div class="form-group">
+              <label for="task-priority">Priority</label>
+              <select id="task-priority" class="form-control">
+                <option value="Low">Low</option>
+                <option value="Medium" selected>Medium</option>
+                <option value="High">High</option>
+                <option value="Urgent">Urgent</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="task-status">Status</label>
+              <select id="task-status" class="form-control">
+                <option value="Pending" selected>Pending</option>
+                <option value="In Progress">In Progress</option>
+                <option value="Completed">Completed</option>
+                <option value="Cancelled">Cancelled</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label for="task-due-date">Due Date</label>
+              <input type="date" id="task-due-date" class="form-control">
+            </div>
+          </div>
+
+          <!-- Subtasks checklist editor section -->
+          <div class="subtasks-section" id="dialog-subtasks-container" style="display: none;">
+            <h4>Subtask Checklist</h4>
+            <div class="subtask-add-form">
+              <input type="text" id="new-subtask-title" class="form-control" placeholder="Add checklist item...">
+              <button type="button" class="btn btn-secondary" id="add-subtask-btn">Add</button>
+            </div>
+            <ul class="subtask-list" id="dialog-subtask-list">
+              <!-- Rendered dynamically -->
+            </ul>
+          </div>
+        </div>
+        <div class="dialog-footer">
+          <button type="button" class="btn btn-secondary" id="task-dialog-cancel">Cancel</button>
+          <button type="submit" class="btn btn-primary" id="task-dialog-submit">Save Task</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script src="/js/utils.js"></script>
+  <script src="/js/calendar.js"></script>
+</body>
+</html>
