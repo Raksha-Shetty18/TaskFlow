@@ -1,7 +1,10 @@
-const { Pool } = require('pg');
+const { Pool, types } = require('pg');
 const sqlite3 = require('sqlite3').verbose();
 const path = require('path');
 const dotenv = require('dotenv');
+
+// Parse DATE type as a raw string (YYYY-MM-DD) instead of local JS Date object to align with SQLite behavior
+types.setTypeParser(1082, (val) => val);
 
 dotenv.config();
 
@@ -229,7 +232,7 @@ async function initializePostgresTables() {
       );
     `);
 
-    // 2. Tasks table
+    // 2. Tasks table (using DATE type for due_date to allow clean index date arithmetic)
     await pool.query(`
       CREATE TABLE IF NOT EXISTS tasks (
         id SERIAL PRIMARY KEY,
@@ -239,13 +242,20 @@ async function initializePostgresTables() {
         category VARCHAR(50) NOT NULL CHECK(category IN ('College', 'Work', 'Personal', 'Project', 'Learning', 'Other')),
         priority VARCHAR(50) NOT NULL CHECK(priority IN ('Low', 'Medium', 'High', 'Urgent')),
         status VARCHAR(50) NOT NULL CHECK(status IN ('Pending', 'In Progress', 'Completed', 'Cancelled')),
-        due_date VARCHAR(50),
+        due_date DATE,
         tags TEXT,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         completed_at TIMESTAMP
       );
     `);
+
+    // Migration: Ensure existing table's due_date column is upgraded to DATE type
+    try {
+      await pool.query("ALTER TABLE tasks ALTER COLUMN due_date TYPE DATE USING due_date::DATE;");
+    } catch (e) {
+      // Ignore if conversion is already applied
+    }
 
     // 3. Subtasks table (storing completeness status as integer 0/1 to align with SQL codebase logic)
     await pool.query(`
